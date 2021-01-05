@@ -104,6 +104,47 @@ module.exports = options => {
         tokens.splice(i + 1, 3);
       }
     }, {
+      /** match
+       * | h1 |
+       * | -- |
+       * | c1 |{.c}
+       *
+       * <td>{.c}</td></tr>
+       */
+      /** NOT match
+       * | h1 |
+       * | -- |
+       * | c1 {.c}
+       */
+      name: 'tr',
+      tests: [
+        {
+          // let this token be i, such that for-loop continues at
+          // next token after tokens.splice
+          shift: 0,
+          type: 'td_open',
+        }, {
+          shift: 1,
+          type: 'inline',
+          content: utils.hasDelimiters('only', options),
+        }, {
+          shift: 2,
+          type: 'td_close',
+        }, {
+          shift: 3,
+          type: 'tr_close',
+        },
+      ],
+      transform: (tokens, i) => {
+        const token = tokens[i + 1]; // inline
+        const trOpen = utils.getMatchingOpeningToken(tokens, i+3); // tr
+        const attrs = utils.getAttrs(token.content, 0, options);
+        // add attributes
+        utils.addAttrs(attrs, trOpen);
+        // remove <td>inline</td>
+        tokens.splice(i, 3);
+      }
+    }, {
       /**
        * *emphasis*{.with attrs=1}
        */
@@ -323,7 +364,7 @@ module.exports = options => {
         let content = token.content;
         let attrs = utils.getAttrs(content, content.lastIndexOf(options.leftDelimiter), options);
         let ii = i + 1;
-        while (tokens[ii + 1] && tokens[ii + 1].nesting === -1) { ii++; }
+        // while (tokens[ii + 1] && tokens[ii + 1].nesting === -1) { ii++; }
         let openingToken = utils.getMatchingOpeningToken(tokens, ii);
         utils.addAttrs(attrs, openingToken);
         let trimmed = content.slice(0, content.lastIndexOf(options.leftDelimiter));

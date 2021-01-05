@@ -1,4 +1,4 @@
-let md = require('markdown-it')();
+let md = require('@sup39/markdown-it')();
 let markdownItAttrs = require('markdown-it-attrs');
 
 md.use(markdownItAttrs);

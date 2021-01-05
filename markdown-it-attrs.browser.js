@@ -1,7 +1,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.markdownItAttrs = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 'use strict';
 
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
 var patternsConfig = require('./patterns.js');
 
@@ -195,13 +195,8 @@ function test(tokens, i, t) {
   for (var key in t) {
     var _ret = _loop2(key);
 
-    switch (_ret) {
-      case "continue":
-        continue;
-
-      default:
-        if (_typeof(_ret) === "object") return _ret.v;
-    }
+    if (_ret === "continue") continue;
+    if (_typeof(_ret) === "object") return _ret.v;
   } // no tests returned false -> all tests returns true
 
 
@@ -334,6 +329,48 @@ module.exports = function (options) {
       utils.addAttrs(attrs, tableOpen); // remove <p>{.c}</p>
 
       tokens.splice(i + 1, 3);
+    }
+  }, {
+    /** match
+     * | h1 |
+     * | -- |
+     * | c1 |{.c}
+     *
+     * <td>{.c}</td></tr>
+     */
+
+    /** NOT match
+     * | h1 |
+     * | -- |
+     * | c1 {.c}
+     */
+    name: 'tr',
+    tests: [{
+      // let this token be i, such that for-loop continues at
+      // next token after tokens.splice
+      shift: 0,
+      type: 'td_open'
+    }, {
+      shift: 1,
+      type: 'inline',
+      content: utils.hasDelimiters('only', options)
+    }, {
+      shift: 2,
+      type: 'td_close'
+    }, {
+      shift: 3,
+      type: 'tr_close'
+    }],
+    transform: function transform(tokens, i) {
+      var token = tokens[i + 1]; // inline
+
+      var trOpen = utils.getMatchingOpeningToken(tokens, i + 3); // tr
+
+      var attrs = utils.getAttrs(token.content, 0, options); // add attributes
+
+      utils.addAttrs(attrs, trOpen); // remove <td>inline</td>
+
+      tokens.splice(i, 3);
     }
   }, {
     /**
@@ -542,11 +579,7 @@ module.exports = function (options) {
       var token = tokens[i].children[j];
       var content = token.content;
       var attrs = utils.getAttrs(content, content.lastIndexOf(options.leftDelimiter), options);
-      var ii = i + 1;
-
-      while (tokens[ii + 1] && tokens[ii + 1].nesting === -1) {
-        ii++;
-      }
+      var ii = i + 1; // while (tokens[ii + 1] && tokens[ii + 1].nesting === -1) { ii++; }
 
       var openingToken = utils.getMatchingOpeningToken(tokens, ii);
       utils.addAttrs(attrs, openingToken);

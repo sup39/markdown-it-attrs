@@ -1,5 +1,54 @@
 # markdown-it-attrs [![Build Status](https://travis-ci.org/arve0/markdown-it-attrs.svg?branch=master)](https://travis-ci.org/arve0/markdown-it-attrs) [![npm version](https://badge.fury.io/js/markdown-it-attrs.svg)](http://badge.fury.io/js/markdown-it-attrs) [![Coverage Status](https://coveralls.io/repos/github/arve0/markdown-it-attrs/badge.svg?branch=master)](https://coveralls.io/github/arve0/markdown-it-attrs?branch=master)
 
+## Local changes
+Implementation of attrs for `tr`.
+
+### CAUTION
+To make this version work,
+it is required to use
+[@sup39/markdown-it](https://github.com/sup39/markdown-it),
+instead of original [markdown-it](https://github.com/markdown-it/markdown-it),
+because the original version eliminates extra tokens
+and force td count to be equal to th count,
+which eliminates the attrs of `tr`.
+Using original [markdown-it](https://github.com/markdown-it/markdown-it)
+will NOT work.
+
+### Example
+For example,
+
+```
+| h1 | h2 |
+| -- | -- |
+| x1 {.c3} | x2 | {.c1}
+| x3 | x4 {.c4} | {.c2}
+```
+
+will be rendered as
+
+```
+<table>
+  <thead>
+    <tr>
+      <th>h1</th>
+      <th>h2</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="c1">
+      <td class="c3">x1</td>
+      <td>x2</td>
+    </tr>
+    <tr class="c2">
+      <td>x3</td>
+      <td class="c4">x4</td>
+    </tr>
+  </tbody>
+</table>
+```
+
+## Original version README
+
 Add classes, identifiers and attributes to your markdown with `{.class #identifier attr=value attr2="spaced value"}` curly brackets, similar to [pandoc's header attributes](http://pandoc.org/README.html#extension-header_attributes).
 
 Example input:

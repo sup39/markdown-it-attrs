@@ -1,7 +1,7 @@
 /* eslint-env mocha, es6 */
 'use strict';
 const assert = require('assert');
-const Md = require('markdown-it');
+const Md = require('@sup39/markdown-it');
 const implicitFigures = require('markdown-it-implicit-figures');
 const attrs = require('./');
 const utils = require('./utils.js');
@@ -379,6 +379,80 @@ function describeTestsWithOptions(options, postText) {
       md = Md().use(attrs, Object.assign({ allowedAttributes: [/^(class|attr)$/] }, options));
       src = 'text {.someclass #someid attr=allowed}';
       expected = '<p class="someclass" attr="allowed">text</p>\n';
+      assert.equal(md.render(replaceDelimiters(src, options)), expected);
+    });
+  });
+
+  describe('@sup39/markdown-it-attrs', () => {
+    let md;
+    beforeEach(() => {
+      md = Md().use(attrs, options);
+    });
+
+    it(replaceDelimiters('should support tr', options), () => {
+      const src = [
+        '| h1 | h2 |',
+        '| -- | -- |',
+        '| x1 {.c3} | x2 | {.c1}',
+        '| x3 | x4 {.c4} | {.c2}',
+        '',
+        '{.c}',
+      ].join('\n');
+      const expected = [
+        '<table class="c">',
+        '<thead>',
+        '<tr>',
+        '<th>h1</th>',
+        '<th>h2</th>',
+        '</tr>',
+        '</thead>',
+        '<tbody>',
+        '<tr class="c1">',
+        '<td class="c3">x1</td>',
+        '<td>x2</td>',
+        '</tr>',
+        '<tr class="c2">',
+        '<td>x3</td>',
+        '<td class="c4">x4</td>',
+        '</tr>',
+        '</tbody>',
+        '</table>',
+        '',
+      ].join('\n');
+      assert.equal(md.render(replaceDelimiters(src, options)), expected);
+    });
+    it(replaceDelimiters('should work well with rowspan/colspan', options), () => {
+      const src = [
+        '| h1 | h2 | h3 | h4 |',
+        '| --- | --- | --- | --- |',
+        '| x11 | x12 | x13 {colspan=2} | x14 |',
+        '| x21 {rowspan=2} | x24 |',
+      ].join('\n');
+      const expected = [
+        '<table>',
+        '<thead>',
+        '<tr>',
+        '<th>h1</th>',
+        '<th>h2</th>',
+        '<th>h3</th>',
+        '<th>h4</th>',
+        '</tr>',
+        '</thead>',
+        '<tbody>',
+        '<tr>',
+        '<td>x11</td>',
+        '<td>x12</td>',
+        '<td colspan="2">x13</td>',
+        '<td>x14</td>',
+        '</tr>',
+        '<tr>',
+        '<td rowspan="2">x21</td>',
+        '<td>x24</td>',
+        '</tr>',
+        '</tbody>',
+        '</table>',
+        '',
+      ].join('\n');
       assert.equal(md.render(replaceDelimiters(src, options)), expected);
     });
   });
