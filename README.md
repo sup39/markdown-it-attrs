@@ -6,13 +6,9 @@ Implementation of attrs for `tr`.
 ### CAUTION
 To make this version work,
 it is required to use
-[@sup39/markdown-it](https://github.com/sup39/markdown-it),
-instead of original [markdown-it](https://github.com/markdown-it/markdown-it),
-because the original version eliminates extra tokens
-and force td count to be equal to th count,
+[@sup39/markdown-it-raw-table](https://github.com/sup39/markdown-it-raw-table)
+plugin, in order to prevent forcing td count to be equal to th count,
 which eliminates the attrs of `tr`.
-Using original [markdown-it](https://github.com/markdown-it/markdown-it)
-will NOT work.
 
 ### Example
 For example,
