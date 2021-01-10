@@ -155,7 +155,7 @@ module.exports = options => {
           type: 'inline',
           children: [
             {
-              shift: -1,
+              shift: -1, // CAUTION: may be evaluated as last child
               nesting: -1  // closing inline tag, </em>{.a}
             }, {
               shift: 0,
@@ -165,6 +165,7 @@ module.exports = options => {
           ]
         }
       ],
+      validate: (tokens, i, j) => j>0, // should not be first element
       transform: (tokens, i, j) => {
         let token = tokens[i].children[j];
         let content = token.content;

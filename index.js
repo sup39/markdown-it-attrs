@@ -26,7 +26,7 @@ module.exports = function attributes(md, options_) {
           if (res.j !== null) { j = res.j; }
           return res.match;
         });
-        if (match) {
+        if (match && (!pattern.validate || pattern.validate(tokens, i, j))) {
           pattern.transform(tokens, i, j);
           if (pattern.name === 'inline attributes' || pattern.name === 'inline nesting 0') {
             // retry, may be several inline attributes
