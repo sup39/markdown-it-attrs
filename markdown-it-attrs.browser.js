@@ -34,7 +34,7 @@ module.exports = function attributes(md, options_) {
           return res.match;
         });
 
-        if (match) {
+        if (match && (!pattern.validate || pattern.validate(tokens, i, j))) {
           pattern.transform(tokens, i, j);
 
           if (pattern.name === 'inline attributes' || pattern.name === 'inline nesting 0') {
@@ -382,6 +382,7 @@ module.exports = function (options) {
       type: 'inline',
       children: [{
         shift: -1,
+        // CAUTION: may be evaluated as last child
         nesting: -1 // closing inline tag, </em>{.a}
 
       }, {
@@ -390,6 +391,10 @@ module.exports = function (options) {
         content: utils.hasDelimiters('start', options)
       }]
     }],
+    validate: function validate(tokens, i, j) {
+      return j > 0;
+    },
+    // should not be first element
     transform: function transform(tokens, i, j) {
       var token = tokens[i].children[j];
       var content = token.content;
@@ -579,7 +584,11 @@ module.exports = function (options) {
       var token = tokens[i].children[j];
       var content = token.content;
       var attrs = utils.getAttrs(content, content.lastIndexOf(options.leftDelimiter), options);
-      var ii = i + 1; // while (tokens[ii + 1] && tokens[ii + 1].nesting === -1) { ii++; }
+      var ii = i + 1;
+
+      while (tokens[ii + 1] && tokens[ii + 1].nesting === -1) {
+        ii++;
+      }
 
       var openingToken = utils.getMatchingOpeningToken(tokens, ii);
       utils.addAttrs(attrs, openingToken);

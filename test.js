@@ -1,7 +1,9 @@
 /* eslint-env mocha, es6 */
 'use strict';
 const assert = require('assert');
-const Md = require('@sup39/markdown-it');
+const Md0 = require('markdown-it');
+const rawTable = require('@sup39/markdown-it-raw-table');
+const Md = () => Md0().use(rawTable);
 const implicitFigures = require('markdown-it-implicit-figures');
 const attrs = require('./');
 const utils = require('./utils.js');
